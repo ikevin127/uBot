@@ -1,11 +1,18 @@
-import app, chr, event, game, item, ui, sys
+import app, event, game, item, ui, sys
 import LHXqEMnOOK as player, FIxdSoEL as net, teIqUKj as chat, QNZB as shop
 
 # If set to `True` in-game chat logs will show-up
 IS_DEBUG_MODE = False
 
-# Cat Bite Knife +0
-DAGGER_VID = 1040
+ALL_GIVABLE_ITEMS = [
+    1040, 1041, 1042, 1043, 1044, # Cat Bite Knife +0 to +4
+    12260, 12261, 12262, 12263, 12264, # Fear Mask +0 to +4
+    12390, 12391, 12392, 12393, 12394, # Orc Hood +0 to +4
+    12530, 12531, 12532, 12533, 12534, # Horned Helmet +0 to +4
+    12670, 12671, 12672, 12673, 12674, # Cardinal's Hat +0 to +4
+    21530, 21531, 21532, 21533, 21534 # Godsend Helmet +0 to +4
+]
+
 # We assume the player has the maximum inventory slots unlocked (GF -> 4 * 45), for good measure
 MAX_INVENTORY_SIZE = 180
 
@@ -166,6 +173,20 @@ def GetItemByID(itemVID):
 			return i
 	return -1
 
+def GetFirstItemSlotFromVIDList(vid_list):
+    sorted_vid_list = sorted(vid_list)
+    for vid in sorted_vid_list:
+        slot = GetItemByID(vid)
+        if slot != -1:
+            return slot
+    return -1
+
+def GetTotalItemCountFromVIDList(vid_list):
+    total_count = 0
+    for vid in vid_list:
+        total_count += player.GetItemCountByVnum(vid)
+    return total_count
+
 """
 Selects NPC dialog answers. If hook=True will avoid quest answers from showing on screen, the caller is then resposible for removing the hook afterwards by calling UnhookFunction.
 
@@ -306,7 +327,7 @@ class ScriptManager(ui.ScriptWindow):
             # --- Giving Items Logic ---
             if self.prev_count is not None:
                 # Check if item count decreased
-                current_count = player.GetItemCountByVnum(DAGGER_VID)
+                current_count = GetTotalItemCountFromVIDList(ALL_GIVABLE_ITEMS)
                 if IS_DEBUG_MODE:
                     log_message("%s items left after run delay." % current_count)
 
@@ -331,7 +352,7 @@ class ScriptManager(ui.ScriptWindow):
                         log_message("Item accepted by NPC.")
                     self.prev_count = None  # Reset prev_count
 
-            count = player.GetItemCountByVnum(DAGGER_VID)
+            count = GetTotalItemCountFromVIDList(ALL_GIVABLE_ITEMS)
             if IS_DEBUG_MODE:
                 log_message("%s items left." % count)
 
@@ -340,7 +361,7 @@ class ScriptManager(ui.ScriptWindow):
                 self.StopGiving()
                 return
 
-            firstItemSlot = GetItemByID(DAGGER_VID)
+            firstItemSlot = GetFirstItemSlotFromVIDList(ALL_GIVABLE_ITEMS)
             if firstItemSlot == -1:
                 log_message("Item not found in inventory.")
                 self.StopGiving()
