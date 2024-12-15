@@ -336,15 +336,11 @@ class ScriptManager(ui.ScriptWindow):
                     return # Exit early if level under 35
 
                 if current_count == self.prev_count:
-                    # Count did not decrease, need to unblock NPC
-                    if IS_DEBUG_MODE:
-                        log_message("Item was not accepted, talking to NPC to sort things out.")
-
                     net.SendOnClickPacket(self.targetVID)
                     # Talking to NPC about Energy Fragment production
                     skipAnswers([4, 254, 254, 0], True)
-                    self.hook_unhook_time = current_time + 1  # Schedule unhooking after 1 second
-                    self.function_sleep_time = current_time + 1.5  # Set delay before re-running script
+                    self.hook_unhook_time = current_time + 0
+                    self.function_sleep_time = current_time + 0
                     return  # Exit to wait for next OnUpdate
                 else:
                     # Count decreased, item was accepted
@@ -376,10 +372,9 @@ class ScriptManager(ui.ScriptWindow):
                 log_message("Item from slot %s was given to Alchemist." % (firstItemSlot + 1))
 
             skipAnswers([0, 254], True)
-            self.hook_unhook_time = current_time + 1  # Schedule unhooking after 1 second
 
             self.prev_count = count
-            self.function_sleep_time = current_time + 1  # Set delay to check after 1 second
+            self.function_sleep_time = current_time + 0
             return  # Exit after setting delay
 
         elif self.is_buying_on:
@@ -402,7 +397,9 @@ class ScriptManager(ui.ScriptWindow):
                         return
                     net.SendOnClickPacket(shopVID)
                     # Talking to Weapon Shop NPC to open the shop
-                    skipAnswers([1], True)
+                    # 0 (default) - If you completed Weapon Shop NPC quests and only Open shop option is available
+                    # 1 - If you did NOT complete Weapon Shop NPC quests and first option is a quest, and the second option is Open shop
+                    skipAnswers([0], True)
                     self.hook_unhook_time = current_time + 1  # Schedule unhooking after 1 second
                     if IS_DEBUG_MODE:
                         log_message("Opening shop...")
@@ -413,7 +410,7 @@ class ScriptManager(ui.ScriptWindow):
                     net.SendShopBuyPacket(4)
                     if IS_DEBUG_MODE:
                         log_message("Bought item from shop slot 4. Empty slots left: %d" % (empty_slots - 1))
-                    self.function_sleep_time = current_time + 1  # Delay before buying next item
+                    self.function_sleep_time = current_time + 0
                     return  # Exit after setting delay
 
         else:
